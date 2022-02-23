@@ -1,7 +1,7 @@
 part of '../navigation.dart';
 
-class BlocNavigator extends StatelessWidget {
-  const BlocNavigator(
+class AdNavigator extends StatelessWidget {
+  const AdNavigator(
       {Key? key,
       required this.initState,
       this.listener,
