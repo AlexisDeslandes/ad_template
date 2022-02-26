@@ -6,15 +6,15 @@ class AdRouterDelegate<Event, State, MainNavBloc extends Bloc<Event, State>>
   AdRouterDelegate(
       {required this.mainNavBloc,
       required this.getPages,
+      required this.setNewRoutePathCallback,
       this.onPopPage,
-      this.observers = const [],
-      this.getBlocByType = const {}});
+      this.observers = const []});
 
   final MainNavBloc mainNavBloc;
   final GetPages<State> getPages;
   final PopPageCallback? onPopPage;
   final List<NavigatorObserver> observers;
-  final Map<Type, GetValue<Bloc>> getBlocByType;
+  final Future<void> Function(BlocEventBuilder builder) setNewRoutePathCallback;
 
   @override
   Widget build(BuildContext context) {
@@ -34,10 +34,6 @@ class AdRouterDelegate<Event, State, MainNavBloc extends Bloc<Event, State>>
   GlobalKey<NavigatorState>? get navigatorKey => GlobalKey();
 
   @override
-  Future<void> setNewRoutePath(BlocEventBuilder configuration) async {
-    final bloc = getBlocByType[configuration.type]?.call();
-    if (bloc != null) {
-      bloc.add(configuration.event);
-    }
-  }
+  Future<void> setNewRoutePath(BlocEventBuilder configuration) =>
+      setNewRoutePathCallback(configuration);
 }

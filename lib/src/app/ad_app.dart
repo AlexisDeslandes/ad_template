@@ -10,7 +10,7 @@ class AdApp<Event, State, MainNavBloc extends Bloc<Event, State>>
       required this.routeInformationParser,
       required this.mainNavBloc,
       required this.getPages,
-      this.getBlocByType = const {},
+      required this.getBlocByTypeCallback,
       this.observers = const [],
       this.theme,
       this.onPop})
@@ -22,7 +22,9 @@ class AdApp<Event, State, MainNavBloc extends Bloc<Event, State>>
   final RouteInformationParser<BlocEventBuilder> routeInformationParser;
   final MainNavBloc mainNavBloc;
   final GetPages<State> getPages;
-  final Map<Type, GetValue<Bloc>> getBlocByType;
+  /// Should return the needed blocs used for deep link, using context.
+  /// eg: getBlocByTypeCallback: (context) => {UserBloc: () => context.read<UserBloc>()}
+  final GetBlocByTypeCallback getBlocByTypeCallback;
   final List<NavigatorObserver> observers;
   final PopPageCallback? onPop;
   final ThemeData? theme;
@@ -41,13 +43,18 @@ class AdApp<Event, State, MainNavBloc extends Bloc<Event, State>>
                 title: title,
                 theme: state,
                 routerDelegate: AdRouterDelegate<Event, State, MainNavBloc>(
+                    setNewRoutePathCallback: (builder) =>
+                        _setNewRoutePathCallback(context, builder),
                     mainNavBloc: mainNavBloc,
                     getPages: getPages,
-                    getBlocByType: getBlocByType,
                     observers: observers,
                     onPopPage: onPop),
                 routeInformationParser: routeInformationParser,
               ),
             )));
   }
+
+  Future<void> _setNewRoutePathCallback(
+          BuildContext context, BlocEventBuilder builder) async =>
+      getBlocByTypeCallback(context)[builder.type]?.call().add(builder.event);
 }
