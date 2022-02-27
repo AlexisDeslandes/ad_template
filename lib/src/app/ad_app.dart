@@ -12,6 +12,8 @@ class AdApp<Event, State, MainNavBloc extends Bloc<Event, State>>
       required this.getPages,
       required this.getBlocByTypeCallback,
       this.observers = const [],
+      this.localizationsDelegates = const [],
+      this.supportedLocales = const [],
       this.theme,
       this.onPop})
       : super(key: key);
@@ -22,12 +24,15 @@ class AdApp<Event, State, MainNavBloc extends Bloc<Event, State>>
   final RouteInformationParser<BlocEventBuilder> routeInformationParser;
   final MainNavBloc mainNavBloc;
   final GetPages<State> getPages;
+
   /// Should return the needed blocs used for deep link, using context.
   /// eg: getBlocByTypeCallback: (context) => {UserBloc: () => context.read<UserBloc>()}
   final GetBlocByTypeCallback getBlocByTypeCallback;
   final List<NavigatorObserver> observers;
   final PopPageCallback? onPop;
   final ThemeData? theme;
+  final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
+  final Iterable<Locale> supportedLocales;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +45,8 @@ class AdApp<Event, State, MainNavBloc extends Bloc<Event, State>>
             ],
             child: BlocBuilder<ThemeCubit, ThemeData>(
               builder: (context, state) => MaterialApp.router(
+                localizationsDelegates: localizationsDelegates,
+                supportedLocales: supportedLocales,
                 title: title,
                 theme: state,
                 routerDelegate: AdRouterDelegate<Event, State, MainNavBloc>(
