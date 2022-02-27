@@ -15,6 +15,7 @@ class AdRouterDelegate<Event, State, MainNavBloc extends Bloc<Event, State>>
   final PopPageCallback? onPopPage;
   final List<NavigatorObserver> observers;
   final Future<void> Function(BlocEventBuilder builder) setNewRoutePathCallback;
+  final GlobalKey<NavigatorState> key = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +32,7 @@ class AdRouterDelegate<Event, State, MainNavBloc extends Bloc<Event, State>>
   }
 
   @override
-  GlobalKey<NavigatorState>? get navigatorKey => GlobalKey();
+  GlobalKey<NavigatorState>? get navigatorKey => key;
 
   @override
   Future<void> setNewRoutePath(BlocEventBuilder configuration) =>
