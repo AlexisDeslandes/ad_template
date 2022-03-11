@@ -1,7 +1,7 @@
 part of 'app.dart';
 
-class AdApp<Event, State, MainNavBloc extends Bloc<Event, State>>
-    extends StatelessWidget {
+class AdApp<BlocEvent, BlocState,
+    MainNavBloc extends Bloc<BlocEvent, BlocState>> extends StatefulWidget {
   const AdApp(
       {Key? key,
       required this.serviceProviderBuilder,
@@ -23,7 +23,7 @@ class AdApp<Event, State, MainNavBloc extends Bloc<Event, State>>
   final BlocProviderBuilder blocProviderBuilder;
   final RouteInformationParser<BlocEventBuilder> routeInformationParser;
   final MainNavBloc mainNavBloc;
-  final GetPages<State> getPages;
+  final GetPages<BlocState> getPages;
 
   /// Should return the needed blocs used for deep link, using context.
   /// eg: getBlocByTypeCallback: (context) => {UserBloc: () => context.read<UserBloc>()}
@@ -35,28 +35,46 @@ class AdApp<Event, State, MainNavBloc extends Bloc<Event, State>>
   final Iterable<Locale> supportedLocales;
 
   @override
+  State<AdApp<BlocEvent, BlocState, MainNavBloc>> createState() =>
+      _AdAppState<BlocEvent, BlocState, MainNavBloc>();
+}
+
+class _AdAppState<BlocEvent, BlocState,
+        MainNavBloc extends Bloc<BlocEvent, BlocState>>
+    extends State<AdApp<BlocEvent, BlocState, MainNavBloc>> {
+  late final List<SingleChildWidget> _providers =
+      widget.serviceProviderBuilder.getProviders(context);
+  late final List<BlocProvider> _blocProviders =
+      widget.blocProviderBuilder.getProviders(context);
+  late final RouterDelegate<BlocEventBuilder> _routerDelegate =
+      AdRouterDelegate<BlocEvent, BlocState, MainNavBloc>(
+          setNewRoutePathCallback: (builder) =>
+              _setNewRoutePathCallback(context, builder),
+          mainNavBloc: widget.mainNavBloc,
+          getPages: widget.getPages,
+          observers: widget.observers,
+          onPopPage: widget.onPop);
+
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: serviceProviderBuilder.getProviders(context),
+        providers: _providers,
         child: MultiBlocProvider(
-            providers: blocProviderBuilder.getProviders(context),
+            providers: _blocProviders,
             child: MaterialApp.router(
-              localizationsDelegates: localizationsDelegates,
-              supportedLocales: supportedLocales,
-              title: title,
-              theme: theme,
-              routerDelegate: AdRouterDelegate<Event, State, MainNavBloc>(
-                  setNewRoutePathCallback: (builder) =>
-                      _setNewRoutePathCallback(context, builder),
-                  mainNavBloc: mainNavBloc,
-                  getPages: getPages,
-                  observers: observers,
-                  onPopPage: onPop),
-              routeInformationParser: routeInformationParser,
+              localizationsDelegates: widget.localizationsDelegates,
+              supportedLocales: widget.supportedLocales,
+              title: widget.title,
+              theme: widget.theme,
+              routerDelegate: _routerDelegate,
+              routeInformationParser: widget.routeInformationParser,
             )));
   }
 
   Future<void> _setNewRoutePathCallback(
           BuildContext context, BlocEventBuilder builder) async =>
-      getBlocByTypeCallback(context)[builder.type]?.call().add(builder.event);
+      widget
+          .getBlocByTypeCallback(context)[builder.type]
+          ?.call()
+          .add(builder.event);
 }
