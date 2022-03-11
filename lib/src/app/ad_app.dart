@@ -39,25 +39,20 @@ class AdApp<Event, State, MainNavBloc extends Bloc<Event, State>>
     return MultiProvider(
         providers: serviceProviderBuilder.getProviders(context),
         child: MultiBlocProvider(
-            providers: [
-              BlocProvider.value(value: ThemeCubit(theme ?? ThemeData.light())),
-              ...blocProviderBuilder.getProviders(context)
-            ],
-            child: BlocBuilder<ThemeCubit, ThemeData>(
-              builder: (context, state) => MaterialApp.router(
-                localizationsDelegates: localizationsDelegates,
-                supportedLocales: supportedLocales,
-                title: title,
-                theme: state,
-                routerDelegate: AdRouterDelegate<Event, State, MainNavBloc>(
-                    setNewRoutePathCallback: (builder) =>
-                        _setNewRoutePathCallback(context, builder),
-                    mainNavBloc: mainNavBloc,
-                    getPages: getPages,
-                    observers: observers,
-                    onPopPage: onPop),
-                routeInformationParser: routeInformationParser,
-              ),
+            providers: blocProviderBuilder.getProviders(context),
+            child: MaterialApp.router(
+              localizationsDelegates: localizationsDelegates,
+              supportedLocales: supportedLocales,
+              title: title,
+              theme: theme,
+              routerDelegate: AdRouterDelegate<Event, State, MainNavBloc>(
+                  setNewRoutePathCallback: (builder) =>
+                      _setNewRoutePathCallback(context, builder),
+                  mainNavBloc: mainNavBloc,
+                  getPages: getPages,
+                  observers: observers,
+                  onPopPage: onPop),
+              routeInformationParser: routeInformationParser,
             )));
   }
 

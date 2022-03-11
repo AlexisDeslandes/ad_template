@@ -5,4 +5,3 @@ export 'src/common/common.dart';
 export 'src/layout/layout.dart';
 export 'src/providers/providers.dart';
 export 'src/router/router.dart';
-export 'src/theme/theme.dart';
