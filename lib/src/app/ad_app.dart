@@ -76,7 +76,7 @@ class _AdAppState<BlocEvent, BlocState,
           providers: blocProviderBuilder.getProviders(context), child: myApp));
     }
 
-    return app;
+    return wrapApp(app);
   }
 
   Future<void> _setNewRoutePathCallback(
