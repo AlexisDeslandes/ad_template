@@ -42,10 +42,6 @@ class AdApp<BlocEvent, BlocState,
 class _AdAppState<BlocEvent, BlocState,
         MainNavBloc extends Bloc<BlocEvent, BlocState>>
     extends State<AdApp<BlocEvent, BlocState, MainNavBloc>> {
-  late final List<SingleChildWidget> _providers =
-      widget.serviceProviderBuilder.getProviders(context);
-  late final List<BlocProvider> _blocProviders =
-      widget.blocProviderBuilder.getProviders(context);
   late final RouterDelegate<BlocEventBuilder> _routerDelegate =
       AdRouterDelegate<BlocEvent, BlocState, MainNavBloc>(
           setNewRoutePathCallback: (builder) =>
@@ -57,18 +53,30 @@ class _AdAppState<BlocEvent, BlocState,
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-        providers: _providers,
-        child: MultiBlocProvider(
-            providers: _blocProviders,
-            child: MaterialApp.router(
-              localizationsDelegates: widget.localizationsDelegates,
-              supportedLocales: widget.supportedLocales,
-              title: widget.title,
-              theme: widget.theme,
-              routerDelegate: _routerDelegate,
-              routeInformationParser: widget.routeInformationParser,
-            )));
+    Widget app = MaterialApp.router(
+      localizationsDelegates: widget.localizationsDelegates,
+      supportedLocales: widget.supportedLocales,
+      title: widget.title,
+      theme: widget.theme,
+      routerDelegate: _routerDelegate,
+      routeInformationParser: widget.routeInformationParser,
+    );
+
+    final serviceProviderBuilder = widget.serviceProviderBuilder;
+    final blocProviderBuilder = widget.blocProviderBuilder;
+    var wrapApp = (Widget myApp) => myApp;
+
+    if (serviceProviderBuilder.isNotEmpty) {
+      wrapApp = (myApp) => MultiProvider(
+          providers: serviceProviderBuilder.getProviders(context),
+          child: myApp);
+    }
+    if (blocProviderBuilder.isNotEmpty) {
+      wrapApp = (myApp) => wrapApp(MultiBlocProvider(
+          providers: blocProviderBuilder.getProviders(context), child: myApp));
+    }
+
+    return app;
   }
 
   Future<void> _setNewRoutePathCallback(
